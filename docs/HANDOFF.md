@@ -105,10 +105,14 @@ Each routine exercise has `targetSets` (N) and a rep range `repMin`-`repMax` (X-
 
 ### 4.8 Volume and personal records (Milestone 5)
 
-- Volume per set = weight x reps for `WEIGHT_REPS` and `WEIGHTED_BODYWEIGHT` (added weight). Other types show reps, duration, or distance totals instead. Warm-up sets are included.
-- Estimated 1RM (Epley: weight x (1 + reps / 30)) for `WEIGHT_REPS`.
+- Volume per set = weight x reps for `WEIGHT_REPS` and `WEIGHTED_BODYWEIGHT`. For `WEIGHTED_BODYWEIGHT`, `weight` is the **added** weight only; the user's body weight is not included. Other types show reps, duration, or distance totals instead. Warm-up sets are included.
+- Estimated 1RM (Epley: weight x (1 + reps / 30)) for `WEIGHT_REPS` only.
 - Per-exercise records: heaviest weight, best estimated 1RM, best single-set volume, most reps.
-- Bodyweight and assisted volume are not computed in v1 (no body weight data).
+- **Body weight in v1 (explicit):** the `body_weight` table exists in schema v1 (Section 5) but nothing reads or writes it in v1: no DAO, repository, UI, or calculation. Consequently:
+  - `BODYWEIGHT_REPS` and `ASSISTED_BODYWEIGHT` have **no volume and no estimated 1RM** in v1. They show reps totals and most reps only.
+  - `ASSISTED_BODYWEIGHT` never computes an effective load (body weight minus assist weight).
+  - `WEIGHTED_BODYWEIGHT` volume uses added weight only, as stated above.
+  - A later version may use `body_weight` to compute effective load (body weight plus or minus the set's weight) for these types. That change must not require a schema migration for the `body_weight` table itself.
 
 ## 5. Data model
 
@@ -136,10 +140,14 @@ All IDs are auto-generated `Long`. All timestamps are epoch millis. Enums are st
 `id`, `workoutId`, `exerciseId`, `position`, `supersetGroup` (nullable), `restSeconds` (nullable), `notes`
 
 **workout_set**
-`id`, `workoutExerciseId`, `position`, `setType`, `weightKg` (nullable), `reps` (nullable), `durationSec` (nullable), `distanceM` (nullable), `completed`, `completedAt` (nullable)
+`id`, `workoutExerciseId`, `position`, `setType`, `weightKg` (nullable), `reps` (nullable), `durationSec` (nullable), `distanceM` (nullable), `rpe` (nullable `Float`), `completed`, `completedAt` (nullable)
+
+**body_weight**
+`id`, `recordedAt`, `weightKg` (`Double`). Present in schema v1 but unused in v1 (see Section 4.8).
 
 Notes:
 - One flat `workout_set` table with nullable value columns. The exercise type, not the schema, decides which columns are used.
+- `rpe` is stored but hidden in the v1 UI. It is populated by the Hevy CSV import (Section 8) so that historical RPE is never lost, and it avoids a migration when RPE UI is added later.
 - Foreign keys with cascade deletes from workout down to sets. Exercises are never hard-deleted.
 - Add indexes on foreign keys and on `workout.startedAt`.
 
@@ -172,7 +180,11 @@ di/        Hilt modules
 - A workout with `endedAt == null` is the active workout. **At most one may exist**; the repository enforces this.
 - Write every change (add exercise, edit a field, complete a set) to Room immediately. Never hold workout state only in memory. The screen observes the database as a `Flow`.
 - After app kill, rotation, or process death, reopening the app returns the user to the active workout exactly as it was.
-- Finishing sets `endedAt`. If incomplete sets exist, ask the user to either complete them or discard them (proposed default). Discarding a workout deletes it after confirmation.
+- Finishing sets `endedAt`. A workout with incomplete sets **cannot be finished silently**:
+  - If any set has `completed == false`, show a warning dialog that states how many sets are incomplete. The user can go back (nothing changes) or confirm "Finish anyway".
+  - On "Finish anyway", the repository deletes all incomplete sets, removes any `workout_exercise` left with no sets, then sets `endedAt`. This happens in one transaction.
+  - If no completed sets remain after that, the workout is not saved as an empty workout: it is deleted, and the user is told so in the confirmation text before they confirm.
+  - Discarding a whole workout is a separate action and deletes it after confirmation.
 
 ### 7.2 Prefill
 
@@ -198,7 +210,8 @@ Rules:
 - Map `set_type` to `SetType` (normal, warm-up, failure, drop). Unknown values become `NORMAL` and are reported.
 - Map `superset_id` to `supersetGroup` (renumber per workout; enforce adjacency).
 - Match exercises by case-insensitive name against the library. If no match, create a custom exercise, inferring `exerciseType` from which columns are populated (for example weight + reps -> `WEIGHT_REPS`, only reps -> `BODYWEIGHT_REPS`, only duration -> `DURATION`). Equipment and muscles for newly created exercises are left unspecified for the user to edit.
-- Columns with no home in the schema (for example `rpe`) are ignored and listed in the import report.
+- Map `rpe` to `workout_set.rpe`. Empty values become `null`. Values that are not valid numbers become `null` and are reported as warnings.
+- Any other column with no home in the schema is ignored and listed in the import report.
 - **Dry-run preview first**: show counts of workouts, exercises (matched vs. new), sets, and any warnings, then require confirmation.
 - **Idempotent**: importing the same file again must not duplicate workouts. Use (`startedAt`, `name`) as the natural key.
 - Run the import in a single database transaction and off the main thread, with progress feedback.
@@ -220,7 +233,7 @@ Each milestone must leave the app building, running, and tested.
 - Exercise list screen (search, view).
 - Start an empty workout, add exercises, log sets using the correct fields per exercise type, mark sets complete, finish.
 - History list and workout detail screens.
-- **Acceptance:** a workout can be fully logged and appears in history; killing the app mid-workout and reopening restores it; unit tests for DAOs and unit conversion pass; manifest has no `INTERNET` permission.
+- **Acceptance:** a workout can be fully logged and appears in history; killing the app mid-workout and reopening restores it; finishing with incomplete sets shows the warning and, if confirmed, deletes those sets (tested); unit tests for DAOs and unit conversion pass; manifest has no `INTERNET` permission.
 
 ### M2: Routines
 - Create, edit, delete routines and folders. Per exercise: N sets and X-Y rep range.
@@ -236,11 +249,12 @@ Each milestone must leave the app building, running, and tested.
 
 ### M4: Hevy CSV import
 - Import flow with file picker, dry-run preview, confirmation, report.
-- **Acceptance:** the user's real export imports correctly; re-importing creates no duplicates; unit tests cover grouping, unit conversion, and set-type mapping on sample files.
+- **Acceptance:** the user's real export imports correctly; re-importing creates no duplicates; unit tests cover grouping, unit conversion, set-type mapping, and RPE mapping on sample files; imported RPE values are stored in `workout_set.rpe`.
 
 ### M5: Progress
 - Per-exercise charts (estimated 1RM, volume, best sets) and personal records.
-- **Acceptance:** numbers match hand-checked examples in tests; PR queries have one easily changed place for the warm-up rule.
+- Bodyweight and assisted types show reps-based records only (Section 4.8).
+- **Acceptance:** numbers match hand-checked examples in tests; PR queries have one easily changed place for the warm-up rule; `BODYWEIGHT_REPS` and `ASSISTED_BODYWEIGHT` produce no volume or estimated 1RM.
 
 ### M6: Backup, restore, polish
 - Export all data to a single file and import it back. Notes on workouts and exercises, unit settings, empty states, accessibility labels, performance check with a large generated history.
@@ -261,14 +275,19 @@ Each milestone must leave the app building, running, and tested.
 - No business rules inside composables or DAOs; put them in `domain/` or repositories.
 - Commit per logical change with clear messages.
 
-## 13. Open questions (decide with the user; do not assume)
+## 13. Resolved decisions and open questions
 
-1. **Body weight log:** should the app track body weight? Without it, bodyweight and assisted exercises are tracked by reps only and have no volume or 1RM. If yes, add a small `body_weight` table (date, kg) and extend Section 4.8.
-2. **RPE:** store and show it, or ignore it on import? Default: ignore.
-3. **Routine targets for non-rep types** (duration, distance): v1 stores only the set count. Add duration or distance targets later?
-4. **Rest timer completion mechanism:** foreground service vs. alarm-based; decided after the Milestone 3 spike.
-5. **Finishing with incomplete sets:** the default in Section 7.1 is a prompt; confirm or change.
+Resolved (also recorded in `docs/DECISIONS.md`):
+
+1. **Body weight log:** the `body_weight` table is included in schema v1, but nothing uses it in v1. Bodyweight and assisted exercises have no volume or 1RM until a later version wires it up (Section 4.8).
+2. **RPE:** stored in `workout_set.rpe`, hidden in the v1 UI, and kept (not ignored) on Hevy CSV import.
+3. **Routine targets for non-rep types:** v1 stores only the set count. Duration and distance targets are deferred.
+4. **Finishing with incomplete sets:** not allowed silently. Warn, and if the user still finishes, delete the incomplete sets (Section 7.1).
+
+Still open:
+
+5. **Rest timer completion mechanism:** foreground service vs. alarm-based; decided after the Milestone 3 spike and recorded in `docs/DECISIONS.md`.
 
 ## 14. Out of scope
 
-Accounts, cloud sync, social features, Google/Apple integrations, iOS, wearables, widgets, body measurements, calendar view, plate calculator. These may come later but must not influence v1 design beyond keeping the schema clean.
+Accounts, cloud sync, social features, Google/Apple integrations, iOS, wearables, widgets, body measurements, a body weight logging UI, RPE UI, calendar view, plate calculator. These may come later but must not influence v1 design beyond keeping the schema clean.

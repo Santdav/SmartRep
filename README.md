@@ -15,10 +15,11 @@ Hevy's free tier caps routines and custom exercises and requires an account. Thi
 - Exercise attributes: equipment, primary and secondary muscle groups, exercise type
 - Routines and folders, with a target of N sets over an X-Y rep range per exercise
 - Workout logging with set types (warm-up, normal, failure, drop)
+- Finishing a workout with incomplete sets shows a warning; if you finish anyway, the incomplete sets are deleted
 - Supersets, in both routines and active workouts
 - Optional rest timer
 - Workout history and per-exercise history
-- Import of your existing data from Hevy's CSV export
+- Import of your existing data from Hevy's CSV export, including RPE (stored, not yet shown in the UI)
 
 **Planned (should-have)**
 - Progress charts and personal records
@@ -87,6 +88,8 @@ The app declares no `INTERNET` permission, so "fully offline" is enforced by the
 
 ## Importing your Hevy data
 
+RPE values in your export are kept and stored with each set. The app does not display RPE yet.
+
 1. In Hevy, export your workouts as CSV from the app's settings.
 2. Copy the CSV file to your phone.
 3. In this app, open Settings, choose Import from Hevy CSV, and pick the file.
@@ -104,12 +107,16 @@ app/src/main/java/<your/package>/
   importer/    Hevy CSV import
   di/          Hilt modules
 docs/
-  HANDOFF.md   Full specification and milestone plan
+  HANDOFF.md      Full specification
+  MILESTONES.md   Milestone checklist and acceptance criteria
+  DECISIONS.md    Architectural and domain decision log
 ```
 
 ## Documentation
 
 - [`docs/HANDOFF.md`](docs/HANDOFF.md): product rules, data model, architecture, import spec, milestones with acceptance criteria.
+- [`docs/MILESTONES.md`](docs/MILESTONES.md): execution checklist per milestone.
+- [`docs/DECISIONS.md`](docs/DECISIONS.md): decision log (alternatives and reasons).
 
 ## Roadmap
 
