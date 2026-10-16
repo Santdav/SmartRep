@@ -17,9 +17,9 @@ Each milestone must end with a runnable app, passing tests, zero `INTERNET` perm
 **Goal:** Ship a working, crash-resilient workout logger backed by Room and bundled seed exercises.
 
 ### Tasks
-- [ ] **Domain Models & Units (`domain/`):**
-  - [ ] Define enums: `Equipment`, `Muscle`, `MuscleRole` (`PRIMARY`, `SECONDARY`), `ExerciseType` (all 9 types), and `SetType` (`NORMAL`, `WARM_UP`, `FAILURE`, `DROP`).
-  - [ ] Implement canonical unit converters (`kg <-> lb`, `meters <-> km/mi`, `seconds <-> duration`) and unit tests.
+- [x] **Domain Models & Units (`domain/`):**
+  - [x] Define enums: `Equipment`, `Muscle`, `MuscleRole` (`PRIMARY`, `SECONDARY`), `ExerciseType` (all 9 types), and `SetType` (`NORMAL`, `WARM_UP`, `FAILURE`, `DROP`).
+  - [x] Implement canonical unit converters (`kg <-> lb`, `meters <-> km/mi`, `seconds <-> duration`) and unit tests.
 - [ ] **Database Schema v1 (`data/local/`):**
   - [ ] Create Room entities: `exercise`, `exercise_muscle`, `routine_folder`, `routine`, `routine_exercise`, `workout`, `workout_exercise`, `workout_set` (with nullable `Float` `rpe`), and `body_weight` (table only: no DAO, repository, UI, or calculation uses it in v1).
   - [ ] Configure foreign keys, cascade deletes (workout -> workout_exercise -> workout_set), and indexes on foreign keys + `workout.startedAt`.
