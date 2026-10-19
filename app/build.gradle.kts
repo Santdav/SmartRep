@@ -10,7 +10,7 @@ plugins {
 
 android {
     // Keep your existing namespace and applicationId per Section 0.7
-    namespace = "com.example.workouttracker"
+    namespace = "com.santda.smartrep"
     compileSdk = 35
 
     defaultConfig {

@@ -1,4 +1,4 @@
-package com.example.workouttracker // Use your existing package name
+package com.santda.smartrep // Use your existing package name
 
 import android.Manifest
 import android.content.pm.PackageManager
