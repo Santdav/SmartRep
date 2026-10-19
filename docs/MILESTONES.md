@@ -20,11 +20,11 @@ Each milestone must end with a runnable app, passing tests, zero `INTERNET` perm
 - [x] **Domain Models & Units (`domain/`):**
   - [x] Define enums: `Equipment`, `Muscle`, `MuscleRole` (`PRIMARY`, `SECONDARY`), `ExerciseType` (all 9 types), and `SetType` (`NORMAL`, `WARM_UP`, `FAILURE`, `DROP`).
   - [x] Implement canonical unit converters (`kg <-> lb`, `meters <-> km/mi`, `seconds <-> duration`) and unit tests.
-- [ ] **Database Schema v1 (`data/local/`):**
+- [x] **Database Schema v1 (`data/local/`):**
   - [x] Create Room entities: `exercise`, `exercise_muscle`, `routine_folder`, `routine`, `routine_exercise`, `workout`, `workout_exercise`, `workout_set` (with nullable `Float` `rpe`), and `body_weight` (table only: no DAO, repository, UI, or calculation uses it in v1).
   - [x] Configure foreign keys, cascade deletes (workout -> workout_exercise -> workout_set), and indexes on foreign keys + `workout.startedAt`.
-  - [ ] Build `AppDatabase`, `ExerciseDao`, and `WorkoutDao` (never use `fallbackToDestructiveMigration`).
-  - [ ] Export Schema `1.json`.
+  - [x] Build `AppDatabase`, `ExerciseDao`, and `WorkoutDao` (never use `fallbackToDestructiveMigration`).
+  - [x] Export Schema `1.json`.
 - [ ] **Seed Loader (`data/seed/`):**
   - [ ] Create `assets/seed_exercises.json` with 100–200 common exercises across all `ExerciseType`s.
   - [ ] Implement idempotent `SeedLoader` (inserts on first launch; adds only new `seedKey`s on updates without overwriting).

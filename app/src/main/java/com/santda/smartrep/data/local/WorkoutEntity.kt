@@ -17,7 +17,6 @@ import androidx.room.PrimaryKey
     ],
     indices = [
         Index("routineId"),
-        Index("startedAt"),
         Index(value = ["startedAt", "name"], unique = true),
     ],
 )
