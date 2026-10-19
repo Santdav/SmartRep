@@ -21,5 +21,7 @@ enum class Muscle {
     UPPER_BACK,
     OTHER,
 
+    SHOULDERS
+
 
 }

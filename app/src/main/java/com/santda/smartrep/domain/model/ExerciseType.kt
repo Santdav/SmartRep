@@ -8,6 +8,5 @@ enum class ExerciseType {
     DURATION,
     DURATION_WEIGHT,
     DISTANCE_DURATION,
-    DISTNACE_WEIGHT,
     WEIGHT_DISTANCE,
 }

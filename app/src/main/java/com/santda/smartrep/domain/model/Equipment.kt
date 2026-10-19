@@ -8,6 +8,8 @@ enum class Equipment {
     CABLE,
     PLATE,
     RESISTANCE_BAND,
-    OTHER
+    OTHER,
+    MACHINE
+
 
 }
