@@ -1,0 +1,124 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "version": {
+      "type": "integer",
+      "description": "The version number of the exercises schema."
+    },
+    "exercises": {
+      "type": "array",
+      "description": "A list of exercise objects.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "seedKey": {
+            "type": "string",
+            "description": "A unique identifier for the exercise."
+          },
+          "name": {
+            "type": "string",
+            "description": "The display name of the exercise."
+          },
+          "equipment": {
+            "type": "string",
+            "enum": [
+              "BARBELL",
+              "CABLE",
+              "DUMBBELL",
+              "KETTLEBELL",
+              "MACHINE",
+              "NONE",
+              "OTHER",
+              "PLATE",
+              "RESISTANCE_BAND"
+            ],
+            "description": "The type of equipment used for the exercise."
+          },
+          "exerciseType": {
+            "type": "string",
+            "enum": [
+              "ASSISTED_BODYWEIGHT",
+              "BODYWEIGHT_REPS",
+              "DISTANCE_DURATION",
+              "DURATION",
+              "DURATION_WEIGHT",
+              "WEIGHTED_BODYWEIGHT",
+              "WEIGHT_DISTANCE",
+              "WEIGHT_REPS"
+            ],
+            "description": "The tracking type for the exercise."
+          },
+          "primary": {
+            "type": "array",
+            "description": "The primary muscle groups targeted.",
+            "items": {
+              "type": "string",
+              "enum": [
+                "ABDOMINAL",
+                "ABDUCTORS",
+                "ADDUCTORS",
+                "BICEPS",
+                "CALVES",
+                "CARDIO",
+                "CHEST",
+                "FOREARMS",
+                "FULL_BODY",
+                "GLUTES",
+                "HAMSTRINGS",
+                "LATS",
+                "LOWER_BACK",
+                "NECK",
+                "QUADRICEPS",
+                "SHOULDERS",
+                "TRAPS",
+                "TRICEPS",
+                "UPPER_BACK"
+              ]
+            }
+          },
+          "secondary": {
+            "type": "array",
+            "description": "The secondary muscle groups engaged.",
+            "items": {
+              "type": "string",
+              "enum": [
+                "ABDOMINAL",
+                "ABDUCTORS",
+                "ADDUCTORS",
+                "BICEPS",
+                "CALVES",
+                "CARDIO",
+                "CHEST",
+                "FOREARMS",
+                "FULL_BODY",
+                "GLUTES",
+                "HAMSTRINGS",
+                "LATS",
+                "LOWER_BACK",
+                "NECK",
+                "QUADRICEPS",
+                "SHOULDERS",
+                "TRAPS",
+                "TRICEPS",
+                "UPPER_BACK"
+              ]
+            }
+          }
+        },
+        "required": [
+          "seedKey",
+          "name",
+          "equipment",
+          "exerciseType",
+          "primary",
+          "secondary"
+        ]
+      }
+    }
+  },
+  "required": [
+    "version",
+    "exercises"
+  ]
+}

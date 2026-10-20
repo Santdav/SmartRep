@@ -25,9 +25,9 @@ Each milestone must end with a runnable app, passing tests, zero `INTERNET` perm
   - [x] Configure foreign keys, cascade deletes (workout -> workout_exercise -> workout_set), and indexes on foreign keys + `workout.startedAt`.
   - [x] Build `AppDatabase`, `ExerciseDao`, and `WorkoutDao` (never use `fallbackToDestructiveMigration`).
   - [x] Export Schema `1.json`.
-- [ ] **Seed Loader (`data/seed/`):**
-  - [ ] Create `assets/seed_exercises.json` with 100–200 common exercises across all `ExerciseType`s.
-  - [ ] Implement idempotent `SeedLoader` (inserts on first launch; adds only new `seedKey`s on updates without overwriting).
+- [x] **Seed Loader (`data/seed/`):**
+  - [x] Create `assets/seed_exercises.json` with 100–200 common exercises across all `ExerciseType`s.
+  - [x] Implement idempotent `SeedLoader` (inserts on first launch; adds only new `seedKey`s on updates without overwriting).
 - [ ] **Active Workout & Repositories (`data/repository/`):**
   - [ ] Enforce the single active workout invariant (at most one workout with `endedAt == null`).
   - [ ] Write every workout mutation (add exercise, edit field, complete set) immediately to Room.
@@ -42,9 +42,9 @@ Each milestone must end with a runnable app, passing tests, zero `INTERNET` perm
 - [ ] A workout can be logged end-to-end and appears in History.
 - [ ] Force-killing the app or rotating the device mid-workout restores the exact active workout state upon reopening.
 - [ ] Finishing with incomplete sets shows the warning; confirming deletes exactly the incomplete sets (and empty exercises); going back changes nothing (verified by automated tests).
-- [ ] Unit tests for unit conversion and in-memory Room DAO tests pass.
+- [x] Unit tests for unit conversion and in-memory Room DAO tests pass.
 - [ ] Compose UI tests for the active workout screen pass.
-- [ ] Merged manifest has no `INTERNET` permission.
+- [x] Merged manifest has no `INTERNET` permission.
 
 ---
 
